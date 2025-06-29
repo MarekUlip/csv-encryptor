@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Decrypt CSV File</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        input[type="file"], input[type="password"], button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+        #error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h2>Decrypt Encrypted CSV</h2>
+    <form id="decryptForm">
+        <label for="fileInput">Encrypted File (.enc):</label>
+        <input type="file" id="fileInput" name="file" required>
+
+        <label for="passwordInput">Password:</label>
+        <input type="password" id="passwordInput" name="password" required>
+
+        <button type="submit">Decrypt & Download</button>
+        <p id="error"></p>
+    </form>
+
+    <script>
+        document.getElementById('decryptForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const file = document.getElementById('fileInput').files[0];
+            const password = document.getElementById('passwordInput').value;
+            const errorEl = document.getElementById('error');
+
+            if (!file || !password) {
+                errorEl.textContent = "Please select a file and enter a password.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch('/api/decrypt', {  // <-- updated for proxying
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    errorEl.textContent = errorData.error || "Decryption failed.";
+                    return;
+                }
+
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'decrypted.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+                errorEl.textContent = "";
+            } catch (err) {
+                console.error(err);
+                errorEl.textContent = "An error occurred while contacting the server.";
+            }
+        });
+    </script>
+</body>
+</html>

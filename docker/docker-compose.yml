@@ -1,0 +1,8 @@
+services:
+  csv-decryptor:
+    build: .
+    ports:
+      - "8080:5000"
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
