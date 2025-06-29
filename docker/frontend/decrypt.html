@@ -31,7 +31,11 @@
 
         <label for="passwordInput">Password:</label>
         <input type="password" id="passwordInput" name="password" required>
-
+        <label for="modeSelect">Decryption Mode:</label>
+        <select id="modeSelect" name="mode" required>
+            <option value="decrypt">Decrypt</option>
+            <option value="decryptAndZip">Decrypt and zip</option>
+        </select>
         <button type="submit">Decrypt & Download</button>
         <p id="error"></p>
     </form>
@@ -43,19 +47,23 @@
             const form = e.target;
             const file = document.getElementById('fileInput').files[0];
             const password = document.getElementById('passwordInput').value;
+            const mode = document.getElementById('modeSelect').value;
             const errorEl = document.getElementById('error');
 
-            if (!file || !password) {
-                errorEl.textContent = "Please select a file and enter a password.";
+            if (!file || !password || !mode) {
+                errorEl.textContent = "Please select a file and enter a password, and choose a mode.";
                 return;
             }
 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('password', password);
-
+            var endpoint = '/api/decrypt';
+            if(mode === 'decryptAndZip'){
+                endpoint = '/api/decrypt_zip'
+            }
             try {
-                const response = await fetch('/api/decrypt', {  // <-- updated for proxying
+                const response = await fetch(endpoint, {  // <-- updated for proxying
                     method: 'POST',
                     body: formData
                 });
@@ -70,7 +78,9 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'decrypted.csv';
+                if(mode === 'decryptAndZip'){
+                    a.download = 'decrypted.zip';
+                }
                 a.click();
                 URL.revokeObjectURL(url);
                 errorEl.textContent = "";
