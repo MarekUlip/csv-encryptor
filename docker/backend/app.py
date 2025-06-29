@@ -81,3 +81,30 @@ def decrypt_csv_zip():
 
     except Exception as e:
         return jsonify({'error': f'Decryption failed: {str(e)}'}), 400
+
+
+@app.route('/api/encrypt_text_zip', methods=['POST'])
+def encrypt_text_zip():
+    text = request.form.get('text')
+    password = request.form.get('password')
+
+    if not text or not password:
+        return jsonify({'error': 'Text and password are required'}), 400
+
+    content = text
+
+    try:
+
+        # Create ZIP in memory
+        zip_buffer = BytesIO()
+        with pyzipper.AESZipFile(zip_buffer, 'w', compression=pyzipper.ZIP_DEFLATED,
+                                 encryption=pyzipper.WZ_AES) as zf:
+            zf.setpassword(password.encode('utf-8'))
+            zf.setencryption(pyzipper.WZ_AES, nbits=256)
+            zf.writestr("encrypted.txt", content)
+
+        zip_buffer.seek(0)
+        return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name='encrypted.zip')
+
+    except Exception as e:
+        return jsonify({'error': f'Encryption failed: {str(e)}'}), 400

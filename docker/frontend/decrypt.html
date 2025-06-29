@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Decrypt CSV File</title>
@@ -12,17 +13,22 @@
             border: 1px solid #ccc;
             border-radius: 10px;
         }
-        input[type="file"], input[type="password"], button {
+
+        input[type="file"],
+        input[type="password"],
+        button {
             display: block;
-            width: 100%;
+            width: 90%;
             margin-bottom: 15px;
             padding: 10px;
         }
+
         #error {
             color: red;
         }
     </style>
 </head>
+
 <body>
     <h2>Decrypt Encrypted CSV</h2>
     <form id="decryptForm">
@@ -39,9 +45,19 @@
         <button type="submit">Decrypt & Download</button>
         <p id="error"></p>
     </form>
+    <h2>Encrypt text into pass zip</h2>
+    <form id="encryptZip" action="/api/encrypt_text_zip" method="POST">
+        <label for="text">Text to Encrypt:</label><br>
+        <textarea id="text" name="text" rows="10" cols="50" required></textarea><br><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">Encrypt and Download ZIP</button>
+    </form>
 
     <script>
-        document.getElementById('decryptForm').addEventListener('submit', async function(e) {
+        document.getElementById('decryptForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const form = e.target;
@@ -59,7 +75,7 @@
             formData.append('file', file);
             formData.append('password', password);
             var endpoint = '/api/decrypt';
-            if(mode === 'decryptAndZip'){
+            if (mode === 'decryptAndZip') {
                 endpoint = '/api/decrypt_zip'
             }
             try {
@@ -78,7 +94,7 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                if(mode === 'decryptAndZip'){
+                if (mode === 'decryptAndZip') {
                     a.download = 'decrypted.zip';
                 }
                 a.click();
@@ -91,4 +107,5 @@
         });
     </script>
 </body>
+
 </html>
